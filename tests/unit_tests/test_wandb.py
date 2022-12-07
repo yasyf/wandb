@@ -433,7 +433,7 @@ def test_log_step_committed_same_dropped(relay_server, wandb_init):
 # ----------------------------------
 
 
-@pytest.mark.xfail(reason="This test is flaky")
+@pytest.mark.flaky
 def test_save_invalid_path(wandb_init):
     run = wandb_init()
     root = tempfile.gettempdir()
@@ -446,7 +446,7 @@ def test_save_invalid_path(wandb_init):
     run.finish()
 
 
-@pytest.mark.xfail(reason="This test is flaky")
+@pytest.mark.flaky
 def test_save_policy_symlink(mock_run, parse_records, record_q):
     run = mock_run()
 
@@ -460,7 +460,7 @@ def test_save_policy_symlink(mock_run, parse_records, record_q):
     assert file_record.policy == 2
 
 
-@pytest.mark.xfail(reason="This test is flaky")
+@pytest.mark.flaky
 def test_save_policy_glob_symlink(mock_run, parse_records, record_q, capsys):
     run = mock_run()
 
@@ -481,7 +481,7 @@ def test_save_policy_glob_symlink(mock_run, parse_records, record_q, capsys):
     assert file_record.policy == 2
 
 
-@pytest.mark.xfail(reason="This test is flaky")
+@pytest.mark.flaky
 def test_save_absolute_path(mock_run, parse_records, record_q, capsys):
     run = mock_run()
     root = tempfile.gettempdir()
@@ -499,7 +499,7 @@ def test_save_absolute_path(mock_run, parse_records, record_q, capsys):
     assert file_record.policy == 2
 
 
-@pytest.mark.xfail(reason="This test is flaky")
+@pytest.mark.flaky
 def test_save_relative_path(mock_run, parse_records, record_q):
     run = mock_run()
     root = tempfile.gettempdir()
