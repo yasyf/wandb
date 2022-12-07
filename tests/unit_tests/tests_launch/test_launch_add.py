@@ -97,6 +97,7 @@ def test_launch_add_delete_queued_run(
         run.finish()
 
 
+@pytest.mark.flaky
 @pytest.mark.timeout(200)
 @pytest.mark.parametrize(
     "launch_config,override_config",
@@ -245,6 +246,7 @@ def test_launch_add_default(
             assert comm["response"]["data"]["pushToRunQueue"] is not None
 
 
+@pytest.mark.flaky
 def test_push_to_runqueue_exists(
     relay_server, user, mocked_fetchable_git_repo, wandb_init, test_settings
 ):
@@ -308,6 +310,7 @@ def test_push_to_default_runqueue_notexist(
         assert not res
 
 
+@pytest.mark.flaky
 def test_push_to_runqueue_old_server(
     relay_server,
     user,
