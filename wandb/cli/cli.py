@@ -1730,6 +1730,12 @@ def artifact():
 @click.option(
     "--name", "-n", help="The name of the artifact to push: project/artifact_name"
 )
+@click.option(
+    "--folder",
+     "-f", 
+     default=None,
+     help="A stored folder location for this artifact in artifacts files page"
+)
 @click.option("--description", "-d", help="A description of this artifact")
 @click.option("--type", "-t", default="dataset", help="The type of the artifact")
 @click.option(
@@ -1740,7 +1746,7 @@ def artifact():
     help="An alias to apply to this artifact",
 )
 @display_error
-def put(path, name, description, type, alias):
+def put(path, name, folder, description, type, alias):
     if name is None:
         name = os.path.basename(path)
     public_api = PublicApi()
@@ -1755,20 +1761,26 @@ def put(path, name, description, type, alias):
     artifact_path = "{entity}/{project}/{name}:{alias}".format(
         entity=entity, project=project, name=artifact_name, alias=alias[0]
     )
+
     if os.path.isdir(path):
         wandb.termlog(
             'Uploading directory {path} to: "{artifact_path}" ({type})'.format(
                 path=path, type=type, artifact_path=artifact_path
             )
         )
-        artifact.add_dir(path)
+        artifact.add_dir(path, folder)
     elif os.path.isfile(path):
         wandb.termlog(
             'Uploading file {path} to: "{artifact_path}" ({type})'.format(
                 path=path, type=type, artifact_path=artifact_path
             )
         )
-        artifact.add_file(path)
+        name = util.to_forward_slash_path(os.path.basename(path))
+        if folder is not None:
+            artifact.add_file(path, f"{folder}/{name}")
+        else:
+            artifact.add_file(path, name)
+
     elif "://" in path:
         wandb.termlog(
             'Logging reference artifact from {path} to: "{artifact_path}" ({type})'.format(
@@ -1810,7 +1822,6 @@ def put(path, name, description, type, alias):
         ),
         prefix=False,
     )
-
 
 @artifact.command(context_settings=CONTEXT, help="Download an artifact from wandb")
 @click.argument("path")
