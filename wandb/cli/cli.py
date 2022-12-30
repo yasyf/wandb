@@ -1732,9 +1732,9 @@ def artifact():
 )
 @click.option(
     "--folder",
-     "-f", 
-     default=None,
-     help="A stored folder location for this artifact in artifacts files page"
+    "-f",
+    default=None,
+    help="A stored folder location for this artifact in artifacts files page"
 )
 @click.option("--description", "-d", help="A description of this artifact")
 @click.option("--type", "-t", default="dataset", help="The type of the artifact")
@@ -1822,6 +1822,7 @@ def put(path, name, folder, description, type, alias):
         ),
         prefix=False,
     )
+
 
 @artifact.command(context_settings=CONTEXT, help="Download an artifact from wandb")
 @click.argument("path")
