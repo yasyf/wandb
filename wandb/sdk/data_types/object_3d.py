@@ -188,7 +188,7 @@ class Object3D(BatchableMedia):
                     """The shape of the numpy array must be one of either
                                     [[x y z],       ...] nx3
                                      [x y z c],     ...] nx4 where c is a category with supported range [1, 14]
-                                     [x y z r g b], ...] nx4 where is rgb is color"""
+                                     [x y z r g b], ...] nx4 where rgb is color"""
                 )
 
             list_data = np_data.tolist()
@@ -239,7 +239,7 @@ class Object3D(BatchableMedia):
         ```
         [[x y z],       ...] nx3
         [[x y z c],     ...] nx4 where c is a category with supported range [1, 14]
-        [[x y z r g b], ...] nx4 where is rgb is color
+        [[x y z r g b], ...] nx4 where rgb is color
         ```
         """
         if not util.is_numpy_array(data):
@@ -250,7 +250,7 @@ class Object3D(BatchableMedia):
                 """The shape of the numpy array must be one of either
                                 [[x y z],       ...] nx3
                                  [x y z c],     ...] nx4 where c is a category with supported range [1, 14]
-                                 [x y z r g b], ...] nx4 where is rgb is color"""
+                                 [x y z r g b], ...] nx4 where rgb is color"""
             )
 
         return cls(data)
