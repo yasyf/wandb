@@ -205,44 +205,42 @@ class Object3D(BatchableMedia):
         else:
             raise ValueError("data must be a numpy array, dict or a file object")
 
-    """
-    Initializes Object3D from a file or stream
-
-    Arguments:
-        data_or_path (Union["TextIO", str]): A path to a file or a `TextIO` stream. 
-        file_type (str): Specifies the format of data in `data_or_path`. Required when `data_or_path` is a
-            stream, ignored when `data_or_path` is a path (the type will be taken from the file extension.)
-    """
-
     @classmethod
     def from_file(
         cls,
         data_or_path: Union["TextIO", str],
         file_type: Optional["FileFormat3D"] = None,
     ) -> "Object3D":
+        """
+        Initializes Object3D from a file or stream
+
+        Arguments:
+            data_or_path (Union["TextIO", str]): A path to a file or a `TextIO` stream.
+            file_type (str): Specifies the format of data in `data_or_path`. Required when `data_or_path` is a
+                stream, ignored when `data_or_path` is a path (the type will be taken from the file extension.)
+        """
         # if file_type is not None and file_type not in cls.SUPPORTED_TYPES:
         #     raise ValueError(
         #         f"Unsupported file type: {file_type}. Supported types are: {cls.SUPPORTED_TYPES}"
         #     )
         return cls(data_or_path, file_type=file_type)
 
-    """
-    Initializes Object3D from a numpy array.
-
-    Arguments:
-        data: (numpy array): Each entry in the array will 
-            represent one point in the point cloud.
-        
-
-    The shape of the numpy array must be one of either:
-    ```
-    [[x y z],       ...] nx3
-    [[x y z c],     ...] nx4 where c is a category with supported range [1, 14]
-    [[x y z r g b], ...] nx4 where is rgb is color
-    """
-
     @classmethod
     def from_numpy(cls, data: "np.ndarray") -> "Object3D":
+        """
+        Initializes Object3D from a numpy array.
+
+        Arguments:
+            data: (numpy array): Each entry in the array will
+                represent one point in the point cloud.
+
+
+        The shape of the numpy array must be one of either:
+        ```
+        [[x y z],       ...] nx3
+        [[x y z c],     ...] nx4 where c is a category with supported range [1, 14]
+        [[x y z r g b], ...] nx4 where is rgb is color
+        """
         if not util.is_numpy_array(data):
             raise ValueError("`data` must be a numpy array")
 
@@ -256,18 +254,6 @@ class Object3D(BatchableMedia):
 
         return cls(data)
 
-    """
-    Initializes Object3D from a python object.
-
-    Arguments:
-        points (Sequence["Point"]): The points in the point cloud.
-        boxes (Sequence["Box3D"]): 3D bounding boxes intended to allow labeling parts of the point cloud. These 
-            will be displayed in the point cloud visualization.
-        vectors (Optional[Sequence["Vector3D"]]): Each vector will be displayed in the point cloud 
-            visualization. Can be used to indicate directionality of bounding boxes. Defaults to None.
-        point_cloud_type ("lidar/beta"): At this time, only the "lidar/beta" type is supported. Defaults to "lidar/beta".
-    """
-
     @classmethod
     def from_point_cloud(
         cls,
@@ -277,6 +263,17 @@ class Object3D(BatchableMedia):
         point_cloud_type: "PointCloudType" = "lidar/beta",
         # camera: Optional[Camera] = None,
     ) -> "Object3D":
+        """
+        Initializes Object3D from a python object.
+
+        Arguments:
+            points (Sequence["Point"]): The points in the point cloud.
+            boxes (Sequence["Box3D"]): 3D bounding boxes intended to allow labeling parts of the point cloud. These
+                will be displayed in the point cloud visualization.
+            vectors (Optional[Sequence["Vector3D"]]): Each vector will be displayed in the point cloud
+                visualization. Can be used to indicate directionality of bounding boxes. Defaults to None.
+            point_cloud_type ("lidar/beta"): At this time, only the "lidar/beta" type is supported. Defaults to "lidar/beta".
+        """
         if point_cloud_type not in cls.SUPPORTED_POINT_CLOUD_TYPES:
             raise ValueError("Point cloud type not supported")
 
