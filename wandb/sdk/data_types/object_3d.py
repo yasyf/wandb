@@ -77,20 +77,6 @@ if TYPE_CHECKING:  # pragma: no cover
 class Object3D(BatchableMedia):
     """
     Wandb class for 3D point clouds.
-
-    Arguments:
-        data_or_path: (numpy array, string, io)
-            Object3D can be initialized from a file or a numpy array.
-
-            You can pass a path to a file or an io object and a file_type
-            which must be one of SUPPORTED_TYPES
-
-    The shape of the numpy array must be one of either:
-    ```
-    [[x y z],       ...] nx3
-    [[x y z c],     ...] nx4 where c is a category with supported range [1, 14]
-    [[x y z r g b], ...] nx6 where is rgb is color
-    ```
     """
 
     SUPPORTED_TYPES: ClassVar[Set[str]] = {
@@ -219,6 +205,15 @@ class Object3D(BatchableMedia):
         else:
             raise ValueError("data must be a numpy array, dict or a file object")
 
+    """
+    Initializes Object3D from a file or stream
+
+    Arguments:
+        data_or_path (Union["TextIO", str]): A path to a file or a `TextIO` stream. 
+        file_type (str): Specifies the format of data in `data_or_path`. Required when `data_or_path` is a
+            stream, ignored when `data_or_path` is a path (the type will be taken from the file extension.)
+    """
+
     @classmethod
     def from_file(
         cls,
@@ -230,6 +225,21 @@ class Object3D(BatchableMedia):
         #         f"Unsupported file type: {file_type}. Supported types are: {cls.SUPPORTED_TYPES}"
         #     )
         return cls(data_or_path, file_type=file_type)
+
+    """
+    Initializes Object3D from a numpy array.
+
+    Arguments:
+        data: (numpy array): Each entry in the array will 
+            represent one point in the point cloud.
+        
+
+    The shape of the numpy array must be one of either:
+    ```
+    [[x y z],       ...] nx3
+    [[x y z c],     ...] nx4 where c is a category with supported range [1, 14]
+    [[x y z r g b], ...] nx4 where is rgb is color
+    """
 
     @classmethod
     def from_numpy(cls, data: "np.ndarray") -> "Object3D":
@@ -245,6 +255,18 @@ class Object3D(BatchableMedia):
             )
 
         return cls(data)
+
+    """
+    Initializes Object3D from a python object.
+
+    Arguments:
+        points (Sequence["Point"]): The points in the point cloud.
+        boxes (Sequence["Box3D"]): 3D bounding boxes intended to allow labeling parts of the point cloud. These 
+            will be displayed in the point cloud visualization.
+        vectors (Optional[Sequence["Vector3D"]]): Each vector will be displayed in the point cloud 
+            visualization. Can be used to indicate directionality of bounding boxes. Defaults to None.
+        point_cloud_type ("lidar/beta"): At this time, only the "lidar/beta" type is supported. Defaults to "lidar/beta".
+    """
 
     @classmethod
     def from_point_cloud(
