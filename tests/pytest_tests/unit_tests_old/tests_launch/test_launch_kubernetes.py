@@ -67,10 +67,10 @@ class MockCoreV1Api:
                     ret.append(pod)
         return MockPodList(ret)
 
-    def read_namespaced_pod_log(self, name, namespace):
+    def read_namespaced_pod(self, name, namespace):
         for pod in self.pods.items:
             if pod.metadata.name == name:
-                return pod.log
+                return pod
 
     def delete_namespaced_secret(self, namespace, name):
         pass
@@ -170,7 +170,7 @@ def setup_mock_kubernetes_client(monkeypatch, jobs, pods, mock_job_base):
     )
 
 
-def pods(job_name):
+def pods(job_name, phase):
     return MockPodList(
         [
             MockDict(
@@ -181,7 +181,7 @@ def pods(job_name):
                         }
                     ),
                     "job_name": job_name,
-                    "log": "test log string",
+                    "status": MockDict({"phase": phase}),
                 }
             )
         ]
@@ -202,7 +202,9 @@ def test_launch_kube(
         }
     )
 
-    setup_mock_kubernetes_client(monkeypatch, jobs, pods("test-job"), status)
+    setup_mock_kubernetes_client(
+        monkeypatch, jobs, pods("test-job", "Succeeded"), status
+    )
 
     api = wandb.sdk.internal.internal_api.Api(
         default_settings=test_settings, load_settings=False
@@ -321,7 +323,7 @@ def test_launch_kube_suspend_cancel(
     entity = "mock_server_entity"
     pod_name = make_name_dns_safe(f"launch-{entity}-{project}-asdfasdf")
 
-    setup_mock_kubernetes_client(monkeypatch, jobs, pods(pod_name), status)
+    setup_mock_kubernetes_client(monkeypatch, jobs, pods(pod_name, "Succeeded"), status)
 
     api = wandb.sdk.internal.internal_api.Api(
         default_settings=test_settings, load_settings=False
@@ -374,7 +376,7 @@ def test_launch_kube_failed(
     entity = "mock_server_entity"
     pod_name = make_name_dns_safe(f"launch-{entity}-{project}-asdfasdf")
 
-    setup_mock_kubernetes_client(monkeypatch, jobs, pods(pod_name), status)
+    setup_mock_kubernetes_client(monkeypatch, jobs, pods(pod_name, "Failed"), status)
 
     api = wandb.sdk.internal.internal_api.Api(
         default_settings=test_settings, load_settings=False
@@ -416,7 +418,7 @@ def test_kube_user_container(
     entity = "mock_server_entity"
     pod_name = make_name_dns_safe(f"launch-{entity}-{project}-asdfasdf")
 
-    setup_mock_kubernetes_client(monkeypatch, jobs, pods(pod_name), status)
+    setup_mock_kubernetes_client(monkeypatch, jobs, pods(pod_name, "Succeeded"), status)
 
     api = wandb.sdk.internal.internal_api.Api(
         default_settings=test_settings, load_settings=False
@@ -477,7 +479,7 @@ def test_kube_multi_container(
     entity = "mock_server_entity"
     pod_name = make_name_dns_safe(f"launch-{entity}-{project}-asdfasdf")
 
-    setup_mock_kubernetes_client(monkeypatch, jobs, pods(pod_name), status)
+    setup_mock_kubernetes_client(monkeypatch, jobs, pods(pod_name, "Succeeded"), status)
 
     api = wandb.sdk.internal.internal_api.Api(
         default_settings=test_settings, load_settings=False
@@ -549,9 +551,6 @@ def test_kube_multi_container(
 def test_get_status_failed(
     live_mock_server, test_settings, mocked_fetchable_git_repo, monkeypatch, capsys
 ):
-    def read_namespaced_pod_log_error(c, name, namespace):
-        raise Exception("test read_namespaced_pod_log_error")
-
     jobs = {}
     status = MockDict(
         {
@@ -566,11 +565,7 @@ def test_get_status_failed(
     entity = "mock_server_entity"
     pod_name = make_name_dns_safe(f"launch-{entity}-{project}-asdfasdf")
 
-    setup_mock_kubernetes_client(monkeypatch, jobs, pods(pod_name), status)
-
-    monkeypatch.setattr(
-        MockCoreV1Api, "read_namespaced_pod_log", read_namespaced_pod_log_error
-    )
+    setup_mock_kubernetes_client(monkeypatch, jobs, pods(pod_name, "Pending"), status)
 
     api = wandb.sdk.internal.internal_api.Api(
         default_settings=test_settings, load_settings=False
@@ -591,7 +586,7 @@ def test_get_status_failed(
     run.get_status()  # fail count => 0
     run.get_status()  # fail count =>
     out, err = capsys.readouterr()
-    assert "Failed to get pod status for job" in err
+    assert "Pod has not started yet for job" in err
 
     run._fail_count = MAX_KUBERNETES_RETRIES
     with pytest.raises(LaunchError) as e:
