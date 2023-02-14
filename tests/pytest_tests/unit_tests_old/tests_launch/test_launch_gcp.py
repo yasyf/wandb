@@ -1,5 +1,6 @@
 import subprocess
 from unittest.mock import MagicMock
+
 import pytest
 import wandb
 import wandb.sdk.launch.launch as launch

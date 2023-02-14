@@ -12,7 +12,6 @@ from wandb.errors import LaunchError
 from wandb.sdk.launch.builder.abstract import AbstractBuilder
 from wandb.sdk.launch.environment.aws_environment import AwsEnvironment
 
-
 from .._project_spec import LaunchProject, get_entry_point_command
 from ..builder.build import get_env_vars_dict
 from ..utils import LOG_PREFIX, PROJECT_SYNCHRONOUS, to_camel_case

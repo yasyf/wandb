@@ -10,8 +10,8 @@ if False:
 import yaml
 
 import wandb
-from wandb.errors import LaunchError
 from wandb.apis.internal import Api
+from wandb.errors import LaunchError
 from wandb.sdk.launch.environment.gcp_environment import GcpEnvironment
 from wandb.util import get_module
 

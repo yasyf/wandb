@@ -10,9 +10,7 @@ import pytest
 import wandb
 import wandb.sdk.launch._project_spec as _project_spec
 import wandb.sdk.launch.launch as launch
-from wandb.sdk.launch.runner.sagemaker_runner import (
-    SagemakerSubmittedRun,
-)
+from wandb.sdk.launch.runner.sagemaker_runner import SagemakerSubmittedRun
 
 from tests.pytest_tests.unit_tests_old.utils import fixture_open
 

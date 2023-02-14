@@ -14,16 +14,10 @@ from wandb.errors import LaunchError
 from wandb.sdk.launch.runner.local_container import LocalSubmittedRun
 from wandb.sdk.lib import runid
 
-from .util import (
-    environment_from_config,
-    registry_from_config,
-    builder_from_config,
-    runner_from_config,
-)
 from .._project_spec import (
+    EntryPoint,
     create_project_from_spec,
     fetch_and_validate_project,
-    EntryPoint,
 )
 from ..builder.loader import load_builder
 from ..runner.abstract import AbstractRun
@@ -33,6 +27,12 @@ from ..utils import (
     LOG_PREFIX,
     PROJECT_SYNCHRONOUS,
     resolve_build_and_registry_config,
+)
+from .util import (
+    builder_from_config,
+    environment_from_config,
+    registry_from_config,
+    runner_from_config,
 )
 
 AGENT_POLLING_INTERVAL = 10
