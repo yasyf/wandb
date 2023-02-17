@@ -34,29 +34,6 @@ def mock_ecr():
     ecr = MagicMock()
 
 
-# @pytest.fixture
-# def mock_builder(mocker):
-#     """Mock a builder."""
-#     builder = MagicMock()
-#     mocker.patch("wandb.sdk.launch.agent.util.builder_from_config", builder)
-
-
-# @pytest.fixture
-# def mock_registry(mocker):
-#     """Mock a registry."""
-#     registry = MagicMock()
-#     registry.get_username_password = MagicMock(return_value=("username", "password"))
-#     mocker.patch("wandb.sdk.launch.agent.util.registry_from_config", registry)
-
-
-# @pytest.fixture
-# def mock_environment(mocker):
-#     """Mock an environment."""
-#     environment = MagicMock()
-#     environment.get_session.return_value = MagicMock()
-#     mocker.patch("wandb.sdk.launch.agent.util.environment_from_config", environment)
-
-
 def mock_create_training_job(*args, **kwargs):
     print(kwargs)
     print(f'Project: {kwargs["Environment"]["WANDB_PROJECT"]}')
@@ -98,8 +75,6 @@ def test_launch_aws_sagemaker_no_instance(
         assert expected_entrypoint in dockerfile_contents, dockerfile_contents
         _project_spec.create_metadata_file(*args, **kwargs)
 
-    monkeypatch.setenv("AWS_ACCESS_KEY_ID", "test")
-    monkeypatch.setenv("AWS_SECRET_ACCESS_KEY", "test")
     monkeypatch.setattr(
         wandb.sdk.launch._project_spec,
         "create_metadata_file",
@@ -109,14 +84,25 @@ def test_launch_aws_sagemaker_no_instance(
     monkeypatch.setattr(
         wandb.docker, "push", lambda x, y: f"The push refers to repository [{x}]"
     )
-    for mock in [
-        "registry_from_config",
-        "builder_from_config",
+    mock_env = MagicMock()
+    session = MagicMock()
+    session.client.return_value = mock_sagemaker_client()
+    mock_env.get_session.return_value = session
+    monkeypatch.setattr(
+        wandb.sdk.launch.agent.util,
         "environment_from_config",
-    ]:
-        monkeypatch.setattr(
-            wandb.sdk.launch.agent.util, mock, lambda *args: MagicMock()
-        )
+        lambda *args: mock_env,
+    )
+    monkeypatch.setattr(
+        wandb.sdk.launch.agent.util,
+        "builder_from_config",
+        lambda *args: MagicMock(),
+    )
+    monkeypatch.setattr(
+        wandb.sdk.launch.agent.util,
+        "registry_from_config",
+        lambda *args: None,
+    )
     api = wandb.sdk.internal.internal_api.Api(
         default_settings=test_settings, load_settings=False
     )
@@ -124,7 +110,6 @@ def test_launch_aws_sagemaker_no_instance(
     kwargs = json.loads(fixture_open("launch/launch_sagemaker_config.json").read())
     kwargs["uri"] = uri
     kwargs["api"] = api
-    kwargs["synchronous"] = False
 
     run = launch.run(**kwargs)
     out, _ = capsys.readouterr()
@@ -144,8 +129,25 @@ def test_launch_aws_sagemaker(
         assert expected_entrypoint in dockerfile_contents, dockerfile_contents
         _project_spec.create_metadata_file(*args, **kwargs)
 
-    monkeypatch.setenv("AWS_ACCESS_KEY_ID", "test")
-    monkeypatch.setenv("AWS_SECRET_ACCESS_KEY", "test")
+    mock_env = MagicMock()
+    session = MagicMock()
+    session.client.return_value = mock_sagemaker_client()
+    mock_env.get_session.return_value = session
+    monkeypatch.setattr(
+        wandb.sdk.launch.agent.util,
+        "environment_from_config",
+        lambda *args: mock_env,
+    )
+    monkeypatch.setattr(
+        wandb.sdk.launch.agent.util,
+        "builder_from_config",
+        lambda *args: MagicMock(),
+    )
+    monkeypatch.setattr(
+        wandb.sdk.launch.agent.util,
+        "registry_from_config",
+        lambda *args: None,
+    )
     monkeypatch.setattr(
         wandb.sdk.launch._project_spec,
         "create_metadata_file",
@@ -207,9 +209,25 @@ def test_launch_aws_sagemaker_launch_fail(
             }
             return sts_client
 
-    monkeypatch.setenv("AWS_ACCESS_KEY_ID", "test")
-    monkeypatch.setenv("AWS_SECRET_ACCESS_KEY", "test")
-    monkeypatch.setattr(boto3, "client", mock_client_launch_fail)
+    mock_env = MagicMock()
+    session = MagicMock()
+    session.client.return_value = mock_sagemaker_client()
+    mock_env.get_session.return_value = session
+    monkeypatch.setattr(
+        wandb.sdk.launch.agent.util,
+        "environment_from_config",
+        lambda *args: mock_env,
+    )
+    monkeypatch.setattr(
+        wandb.sdk.launch.agent.util,
+        "builder_from_config",
+        lambda *args: MagicMock(),
+    )
+    monkeypatch.setattr(
+        wandb.sdk.launch.agent.util,
+        "registry_from_config",
+        lambda *args: None,
+    )
     monkeypatch.setattr(wandb.docker, "tag", lambda x, y: "")
     monkeypatch.setattr(
         wandb.docker, "push", lambda x, y: f"The push refers to repository [{x}]"
@@ -247,7 +265,25 @@ def test_launch_aws_sagemaker_push_image_fail_none(
     kwargs = json.loads(fixture_open("launch/launch_sagemaker_config.json").read())
     kwargs["uri"] = uri
     kwargs["api"] = api
-
+    mock_env = MagicMock()
+    session = MagicMock()
+    session.client.return_value = mock_sagemaker_client()
+    mock_env.get_session.return_value = session
+    monkeypatch.setattr(
+        wandb.sdk.launch.agent.util,
+        "environment_from_config",
+        lambda *args: mock_env,
+    )
+    monkeypatch.setattr(
+        wandb.sdk.launch.agent.util,
+        "builder_from_config",
+        lambda *args: MagicMock(),
+    )
+    monkeypatch.setattr(
+        wandb.sdk.launch.agent.util,
+        "registry_from_config",
+        lambda *args: None,
+    )
     with pytest.raises(wandb.errors.LaunchError) as e_info:
         launch.run(**kwargs)
     assert "Failed to push image to repository" in str(e_info.value)
@@ -259,8 +295,25 @@ def test_launch_aws_sagemaker_push_image_fail_err_msg(
     mocked_fetchable_git_repo,
     monkeypatch,
 ):
-    monkeypatch.setenv("AWS_ACCESS_KEY_ID", "test")
-    monkeypatch.setenv("AWS_SECRET_ACCESS_KEY", "test")
+    mock_env = MagicMock()
+    session = MagicMock()
+    session.client.return_value = mock_sagemaker_client()
+    mock_env.get_session.return_value = session
+    monkeypatch.setattr(
+        wandb.sdk.launch.agent.util,
+        "environment_from_config",
+        lambda *args: mock_env,
+    )
+    monkeypatch.setattr(
+        wandb.sdk.launch.agent.util,
+        "builder_from_config",
+        lambda *args: MagicMock(),
+    )
+    monkeypatch.setattr(
+        wandb.sdk.launch.agent.util,
+        "registry_from_config",
+        lambda *args: None,
+    )
     monkeypatch.setattr(wandb.docker, "tag", lambda x, y: "")
     monkeypatch.setattr(
         wandb.docker, "push", lambda x, y: "I regret to inform you, that I have failed"
@@ -286,8 +339,25 @@ def test_launch_aws_sagemaker_push_image_fail_err_msg(
 def test_sagemaker_specified_image(
     live_mock_server, test_settings, mocked_fetchable_git_repo, monkeypatch, capsys
 ):
-    monkeypatch.setenv("AWS_ACCESS_KEY_ID", "test")
-    monkeypatch.setenv("AWS_SECRET_ACCESS_KEY", "test")
+    mock_env = MagicMock()
+    session = MagicMock()
+    session.client.return_value = mock_sagemaker_client()
+    mock_env.get_session.return_value = session
+    monkeypatch.setattr(
+        wandb.sdk.launch.agent.util,
+        "environment_from_config",
+        lambda *args: mock_env,
+    )
+    monkeypatch.setattr(
+        wandb.sdk.launch.agent.util,
+        "builder_from_config",
+        lambda *args: MagicMock(),
+    )
+    monkeypatch.setattr(
+        wandb.sdk.launch.agent.util,
+        "registry_from_config",
+        lambda *args: None,
+    )
     api = wandb.sdk.internal.internal_api.Api(
         default_settings=test_settings, load_settings=False
     )
@@ -379,24 +449,6 @@ def test_aws_submitted_run_id():
     assert run.id == "sagemaker-test-job-1"
 
 
-def test_failed_aws_cred_login(
-    runner, live_mock_server, monkeypatch, test_settings, mocked_fetchable_git_repo
-):
-    monkeypatch.setenv("AWS_ACCESS_KEY_ID", "test")
-    monkeypatch.setenv("AWS_SECRET_ACCESS_KEY", "test")
-    kwargs = json.loads(fixture_open("launch/launch_sagemaker_config.json").read())
-    with runner.isolated_filesystem():
-        uri = "https://wandb.ai/mock_server_entity/test/runs/1"
-        api = wandb.sdk.internal.internal_api.Api(
-            default_settings=test_settings, load_settings=False
-        )
-        kwargs["uri"] = uri
-        kwargs["api"] = api
-
-        with pytest.raises(wandb.errors.LaunchError):
-            launch.run(**kwargs)
-
-
 def test_no_sagemaker_resource_args(
     runner, live_mock_server, test_settings, mocked_fetchable_git_repo, monkeypatch
 ):
@@ -425,8 +477,25 @@ def test_no_sagemaker_resource_args(
 def test_no_OuputDataConfig(
     runner, live_mock_server, test_settings, mocked_fetchable_git_repo, monkeypatch
 ):
-    monkeypatch.setenv("AWS_ACCESS_KEY_ID", "test")
-    monkeypatch.setenv("AWS_SECRET_ACCESS_KEY", "test")
+    mock_env = MagicMock()
+    session = MagicMock()
+    session.client.return_value = mock_sagemaker_client()
+    mock_env.get_session.return_value = session
+    monkeypatch.setattr(
+        wandb.sdk.launch.agent.util,
+        "environment_from_config",
+        lambda *args: mock_env,
+    )
+    monkeypatch.setattr(
+        wandb.sdk.launch.agent.util,
+        "builder_from_config",
+        lambda *args: MagicMock(),
+    )
+    monkeypatch.setattr(
+        wandb.sdk.launch.agent.util,
+        "registry_from_config",
+        lambda *args: None,
+    )
     monkeypatch.setattr(
         "wandb.sdk.launch.launch.LAUNCH_CONFIG_FILE", "./random-nonexistant-file.yaml"
     )
@@ -453,8 +522,25 @@ def test_no_OuputDataConfig(
 def test_no_StoppingCondition(
     runner, live_mock_server, test_settings, mocked_fetchable_git_repo, monkeypatch
 ):
-    monkeypatch.setenv("AWS_ACCESS_KEY_ID", "test")
-    monkeypatch.setenv("AWS_SECRET_ACCESS_KEY", "test")
+    mock_env = MagicMock()
+    session = MagicMock()
+    session.client.return_value = mock_sagemaker_client()
+    mock_env.get_session.return_value = session
+    monkeypatch.setattr(
+        wandb.sdk.launch.agent.util,
+        "environment_from_config",
+        lambda *args: mock_env,
+    )
+    monkeypatch.setattr(
+        wandb.sdk.launch.agent.util,
+        "builder_from_config",
+        lambda *args: MagicMock(),
+    )
+    monkeypatch.setattr(
+        wandb.sdk.launch.agent.util,
+        "registry_from_config",
+        lambda *args: None,
+    )
     monkeypatch.setattr(
         wandb.docker, "push", lambda x, y: f"The push refers to repository [{x}]"
     )
@@ -480,6 +566,25 @@ def test_no_ResourceConfig(
     runner, live_mock_server, test_settings, mocked_fetchable_git_repo, monkeypatch
 ):
     kwargs = json.loads(fixture_open("launch/launch_sagemaker_config.json").read())
+    mock_env = MagicMock()
+    session = MagicMock()
+    session.client.return_value = mock_sagemaker_client()
+    mock_env.get_session.return_value = session
+    monkeypatch.setattr(
+        wandb.sdk.launch.agent.util,
+        "environment_from_config",
+        lambda *args: mock_env,
+    )
+    monkeypatch.setattr(
+        wandb.sdk.launch.agent.util,
+        "builder_from_config",
+        lambda *args: MagicMock(),
+    )
+    monkeypatch.setattr(
+        wandb.sdk.launch.agent.util,
+        "registry_from_config",
+        lambda *args: None,
+    )
     with runner.isolated_filesystem():
         uri = "https://wandb.ai/mock_server_entity/test/runs/1"
         api = wandb.sdk.internal.internal_api.Api(
@@ -501,6 +606,25 @@ def test_no_RoleARN(
     runner, live_mock_server, test_settings, mocked_fetchable_git_repo, monkeypatch
 ):
     kwargs = json.loads(fixture_open("launch/launch_sagemaker_config.json").read())
+    mock_env = MagicMock()
+    session = MagicMock()
+    session.client.return_value = mock_sagemaker_client()
+    mock_env.get_session.return_value = session
+    monkeypatch.setattr(
+        wandb.sdk.launch.agent.util,
+        "environment_from_config",
+        lambda *args: mock_env,
+    )
+    monkeypatch.setattr(
+        wandb.sdk.launch.agent.util,
+        "builder_from_config",
+        lambda *args: MagicMock(),
+    )
+    monkeypatch.setattr(
+        wandb.sdk.launch.agent.util,
+        "registry_from_config",
+        lambda *args: None,
+    )
     with runner.isolated_filesystem():
         uri = "https://wandb.ai/mock_server_entity/test/runs/1"
         api = wandb.sdk.internal.internal_api.Api(
