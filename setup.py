@@ -6,12 +6,33 @@ from setuptools import setup
 with open("package_readme.md") as readme_file:
     readme = readme_file.read()
 
-with open("requirements.txt") as requirements_file:
-    requirements = requirements_file.read().splitlines()
+# with open("requirements.txt") as requirements_file:
+#     requirements = requirements_file.read().splitlines()
 
 with open("requirements_sweeps.txt") as sweeps_requirements_file:
     sweeps_requirements = sweeps_requirements_file.read().splitlines()
 
+
+requirements = [
+    "Click>=7.0,!=8.0.0",
+    "GitPython>=1.0.0",
+    "requests>=2.0.0,<3",
+    "psutil>=5.0.0",
+    "sentry-sdk>=1.0.0",
+    "docker-pycreds>=0.4.0",
+    "protobuf>=3.12.0,!=4.21.0,<5; python_version < '3.9' and sys_platform == 'linux'",
+    "protobuf>=3.15.0,!=4.21.0,<5; python_version == '3.9' and sys_platform == 'linux'",
+    "protobuf>=3.19.0,!=4.21.0,<5; python_version > '3.9' and sys_platform == 'linux'",
+    "protobuf>=3.19.0,!=4.21.0,<5; sys_platform != 'linux'",
+    "PyYAML",
+    # supports vendored version of watchdog 0.9.0
+    "pathtools",
+    "setproctitle",
+    "setuptools",
+    "appdirs>=1.4.3",
+    "dataclasses; python_version < '3.7'",
+    "typing_extensions; python_version < '3.10'",
+]
 
 test_requirements = ["mock>=2.0.0", "tox-pyenv>=1.0.3"]
 
