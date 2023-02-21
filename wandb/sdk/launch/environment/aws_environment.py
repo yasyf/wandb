@@ -74,8 +74,6 @@ class AwsEnvironment(AbstractEnvironment):
             secret_key = credentials.secret_key
             session_token = credentials.token
         except botocore.client.ClientError as e:
-            traceback.format_exc()
-            _logger.error()
             raise LaunchError(
                 f"Could not create AWS environment from default environment. Please verify that your AWS credentials are configured correctly. {e}"
             )
@@ -91,6 +89,10 @@ class AwsEnvironment(AbstractEnvironment):
     def region(self) -> str:
         """The AWS region."""
         return self._region
+
+    @region.setter
+    def region(self, region: str) -> None:
+        self._region = region
 
     @classmethod
     def from_config(cls, config: dict, verify: bool = True) -> "AwsEnvironment":
@@ -108,7 +110,11 @@ class AwsEnvironment(AbstractEnvironment):
                 f"Could not create AWS environment from config. Expected type 'aws' "
                 f"but got '{config.get('type')}'."
             )
-        region = config.get("region")
+        region = str(config.get("region", ""))
+        if not region:
+            raise LaunchError(
+                "Could not create AWS environment from config. Region not specified."
+            )
         return cls.from_default(
             region=region,
             verify=verify,

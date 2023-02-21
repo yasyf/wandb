@@ -15,20 +15,16 @@ from wandb.sdk.launch.runner.local_container import LocalSubmittedRun
 from wandb.sdk.lib import runid
 
 from .._project_spec import (
-    EntryPoint,
     create_project_from_spec,
     fetch_and_validate_project,
 )
-from ..builder.loader import load_builder
 from ..runner.abstract import AbstractRun
-from ..runner.loader import load_backend
 from ..utils import (
     LAUNCH_DEFAULT_PROJECT,
     LOG_PREFIX,
     PROJECT_SYNCHRONOUS,
-    resolve_build_and_registry_config,
 )
-from .util import (
+from ..loader import (
     builder_from_config,
     environment_from_config,
     registry_from_config,
