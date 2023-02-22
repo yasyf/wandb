@@ -84,7 +84,7 @@ class VertexRunner(AbstractRunner):
     def run(
         self,
         launch_project: LaunchProject,
-        builder: AbstractBuilder,
+        builder: Optional[AbstractBuilder],
     ) -> Optional[AbstractRun]:
         """Run a Vertex job."""
         aiplatform = get_module(  # noqa: F811
@@ -129,6 +129,7 @@ class VertexRunner(AbstractRunner):
             image_uri = launch_project.docker_image
         else:
             assert entry_point is not None
+            assert builder is not None
             image_uri = builder.build_image(
                 launch_project,
                 entry_point,
