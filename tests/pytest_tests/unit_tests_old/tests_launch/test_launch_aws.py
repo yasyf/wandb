@@ -11,6 +11,7 @@ import wandb
 import wandb.sdk.launch._project_spec as _project_spec
 import wandb.sdk.launch.launch as launch
 from wandb.sdk.launch.runner.sagemaker_runner import SagemakerSubmittedRun
+from wandb.sdk.launch.environment.aws_environment import AwsEnvironment
 
 from tests.pytest_tests.unit_tests_old.utils import fixture_open
 
@@ -84,7 +85,7 @@ def test_launch_aws_sagemaker_no_instance(
     monkeypatch.setattr(
         wandb.docker, "push", lambda x, y: f"The push refers to repository [{x}]"
     )
-    mock_env = MagicMock()
+    mock_env = MagicMock(spec=AwsEnvironment)
     session = MagicMock()
     session.client.return_value = mock_sagemaker_client()
     mock_env.get_session.return_value = session
@@ -129,7 +130,7 @@ def test_launch_aws_sagemaker(
         assert expected_entrypoint in dockerfile_contents, dockerfile_contents
         _project_spec.create_metadata_file(*args, **kwargs)
 
-    mock_env = MagicMock()
+    mock_env = MagicMock(spec=AwsEnvironment)
     session = MagicMock()
     session.client.return_value = mock_sagemaker_client()
     mock_env.get_session.return_value = session
@@ -209,7 +210,7 @@ def test_launch_aws_sagemaker_launch_fail(
             }
             return sts_client
 
-    mock_env = MagicMock()
+    mock_env = MagicMock(spec=AwsEnvironment)
     session = MagicMock()
     session.client = mock_client_launch_fail
     mock_env.get_session.return_value = session
@@ -242,7 +243,7 @@ def test_launch_aws_sagemaker_launch_fail(
 def test_sagemaker_specified_image(
     live_mock_server, test_settings, mocked_fetchable_git_repo, monkeypatch, capsys
 ):
-    mock_env = MagicMock()
+    mock_env = MagicMock(spec=AwsEnvironment)
     session = MagicMock()
     session.client.return_value = mock_sagemaker_client()
     mock_env.get_session.return_value = session
@@ -360,6 +361,15 @@ def test_no_sagemaker_resource_args(
     monkeypatch.setattr(
         wandb.docker, "push", lambda x, y: f"The push refers to repository [{x}]"
     )
+    mock_env = MagicMock(spec=AwsEnvironment)
+    session = MagicMock()
+    session.client.return_value = mock_sagemaker_client()
+    mock_env.get_session.return_value = session
+    monkeypatch.setattr(
+        wandb.sdk.launch.loader,
+        "environment_from_config",
+        lambda *args: mock_env,
+    )
     kwargs = json.loads(fixture_open("launch/launch_sagemaker_config.json").read())
     with runner.isolated_filesystem():
         uri = "https://wandb.ai/mock_server_entity/test/runs/1"
@@ -380,7 +390,7 @@ def test_no_sagemaker_resource_args(
 def test_no_OuputDataConfig(
     runner, live_mock_server, test_settings, mocked_fetchable_git_repo, monkeypatch
 ):
-    mock_env = MagicMock()
+    mock_env = MagicMock(spec=AwsEnvironment)
     session = MagicMock()
     session.client.return_value = mock_sagemaker_client()
     mock_env.get_session.return_value = session
@@ -425,7 +435,7 @@ def test_no_OuputDataConfig(
 def test_no_StoppingCondition(
     runner, live_mock_server, test_settings, mocked_fetchable_git_repo, monkeypatch
 ):
-    mock_env = MagicMock()
+    mock_env = MagicMock(spec=AwsEnvironment)
     session = MagicMock()
     session.client.return_value = mock_sagemaker_client()
     mock_env.get_session.return_value = session
@@ -469,7 +479,7 @@ def test_no_ResourceConfig(
     runner, live_mock_server, test_settings, mocked_fetchable_git_repo, monkeypatch
 ):
     kwargs = json.loads(fixture_open("launch/launch_sagemaker_config.json").read())
-    mock_env = MagicMock()
+    mock_env = MagicMock(spec=AwsEnvironment)
     session = MagicMock()
     session.client.return_value = mock_sagemaker_client()
     mock_env.get_session.return_value = session
@@ -509,7 +519,7 @@ def test_no_RoleARN(
     runner, live_mock_server, test_settings, mocked_fetchable_git_repo, monkeypatch
 ):
     kwargs = json.loads(fixture_open("launch/launch_sagemaker_config.json").read())
-    mock_env = MagicMock()
+    mock_env = MagicMock(spec=AwsEnvironment)
     session = MagicMock()
     session.client.return_value = mock_sagemaker_client()
     mock_env.get_session.return_value = session

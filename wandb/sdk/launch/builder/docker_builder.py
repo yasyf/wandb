@@ -44,8 +44,8 @@ class DockerBuilder(AbstractBuilder):
         self,
         environment: AbstractEnvironment,
         registry: AbstractRegistry,
-        verify=True,
-        login=True,
+        verify: bool = True,
+        login: bool = True,
     ):
         """Initialize a DockerBuilder.
 
@@ -71,6 +71,7 @@ class DockerBuilder(AbstractBuilder):
         config: Dict[str, Any],
         environment: AbstractEnvironment,
         registry: AbstractRegistry,
+        verify: bool = True,
     ) -> "DockerBuilder":
         """Create a DockerBuilder from a config.
 
@@ -87,11 +88,11 @@ class DockerBuilder(AbstractBuilder):
         # but ultimately we should add things like target platform, base image, etc.
         return cls(environment, registry)
 
-    def verify(self):
+    def verify(self) -> None:
         """Verify the builder."""
         validate_docker_installation()
 
-    def login(self):
+    def login(self) -> None:
         """Login to the registry."""
         if isinstance(self.registry, LocalRegistry):
             _logger.info(f"{LOG_PREFIX} No registry configured, skipping login.")

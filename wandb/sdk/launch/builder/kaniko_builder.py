@@ -1,10 +1,9 @@
 import base64
 import json
-import os
 import tarfile
 import tempfile
 import time
-from typing import Any, Dict, Optional
+from typing import Optional
 
 import kubernetes  # type: ignore
 from kubernetes import client
@@ -18,7 +17,6 @@ from wandb.sdk.launch.registry.elastic_container_registry import (
     ElasticContainerRegistry,
 )
 from wandb.sdk.launch.registry.google_artifact_registry import GoogleArtifactRegistry
-from wandb.util import get_module
 
 from .._project_spec import (
     EntryPoint,
@@ -65,10 +63,10 @@ class KanikoBuilder(AbstractBuilder):
         environment: AbstractEnvironment,
         registry: AbstractRegistry,
         build_job_name: str = "wandb-launch-container-build",
-        build_context_store: str = None,
-        secret_name: str = None,
-        secret_key: str = None,
-        verify=True,
+        build_context_store: str = "",
+        secret_name: str = "",
+        secret_key: str = "",
+        verify: bool = True,
     ):
         """Initialize a KanikoBuilder.
 
@@ -132,8 +130,8 @@ class KanikoBuilder(AbstractBuilder):
                 "storage url in the 'build_context_store' field of your builder config."
             )
         build_job_name = config.get("build-job-name", "wandb-launch-container-build")
-        secret_name = config.get("secret-name")
-        secret_key = config.get("secret-key")
+        secret_name = config.get("secret-name", "")
+        secret_key = config.get("secret-key", "")
         return cls(
             environment,
             registry,
@@ -154,7 +152,7 @@ class KanikoBuilder(AbstractBuilder):
 
     def login(self) -> None:
         """Login to the registry."""
-        super().login()
+        pass
 
     def _create_docker_ecr_config_map(
         self, corev1_client: client.CoreV1Api, repository: str
@@ -283,7 +281,7 @@ class KanikoBuilder(AbstractBuilder):
             ),
         ]
 
-        if self.secret_name is not None and self.secret_key is not None:
+        if self.secret_name and self.secret_key:
             # TODO: We should validate that the secret exists and has the key
             # before creating the job. Or when we create the builder.
             # TODO: I don't like conditioning on the registry type here. As a
@@ -312,6 +310,10 @@ class KanikoBuilder(AbstractBuilder):
                         value="/kaniko/.config/gcloud/config.json",
                     )
                 ]
+            else:
+                raise LaunchError(
+                    f"Registry type {type(self.registry)} not supported by kaniko"
+                )
             volume_mounts += [
                 client.V1VolumeMount(
                     name=self.secret_name,

@@ -8,6 +8,8 @@ from ..environment.abstract import AbstractEnvironment
 class AbstractRegistry(ABC):
     """Abstract base class for registries."""
 
+    uri: str
+
     @abstractmethod
     def verify(self) -> None:
         """Verify that the registry is configured correctly."""
@@ -26,7 +28,7 @@ class AbstractRegistry(ABC):
     @classmethod
     @abstractmethod
     def from_config(
-        cls, config: dict, environment: "AbstractEnvironment"
+        cls, config: dict, environment: "AbstractEnvironment", verify: bool = True
     ) -> "AbstractRegistry":
         """Create a registry from a config."""
         raise NotImplementedError

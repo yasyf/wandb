@@ -1,5 +1,5 @@
 """NoOp builder implementation."""
-from typing import Any, Dict, Optional
+from typing import Any, Dict
 
 from wandb.errors import LaunchError
 from wandb.sdk.launch.builder.abstract import AbstractBuilder
@@ -25,10 +25,14 @@ class NoOpBuilder(AbstractBuilder):
 
     @classmethod
     def from_config(
-        cls, config: dict, registry: AbstractRegistry, verify: bool = True
+        cls,
+        config: dict,
+        environment: AbstractEnvironment,
+        registry: AbstractRegistry,
+        verify: bool = True,
     ) -> "AbstractBuilder":
         """Create a noop builder from a config."""
-        return cls(config, None, None)
+        return cls(config, environment, registry)
 
     def verify(self) -> None:
         """Verify the builder."""

@@ -30,7 +30,6 @@ from ..loader import (
     registry_from_config,
     runner_from_config,
 )
-from ..environment.local_environment import LocalEnvironment
 
 AGENT_POLLING_INTERVAL = 10
 
@@ -73,7 +72,7 @@ class LaunchAgent:
     _cwd: str
     _namespace: str
     _access: str
-    _max_jobs: int
+    _max_jobs: float
     default_config: Dict[str, Any]
     gorilla_supports_agents: bool
     _queues: List[str]
@@ -90,8 +89,8 @@ class LaunchAgent:
         Raises:
             AssertionError: if config is missing the "entity" or "project" key.
         """
-        self._entity = config.get("entity")
-        self._project = config.get("project")
+        self._entity = str(config.get("entity"))
+        self._project = str(config.get("project"))
         self._api = api
         self._base_url = self._api.settings().get("base_url")
         self._jobs: Dict[Union[int, str], AbstractRun] = {}

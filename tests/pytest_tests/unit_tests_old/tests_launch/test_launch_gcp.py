@@ -7,6 +7,7 @@ import wandb.sdk.launch.launch as launch
 from google.cloud import aiplatform
 from wandb.errors import LaunchError
 from wandb.sdk.launch.runner.vertex_runner import get_gcp_config, run_shell
+from wandb.sdk.launch.environment.gcp_environment import GcpEnvironment
 
 from .test_launch import mock_load_backend, mocked_fetchable_git_repo  # noqa: F401
 
@@ -128,9 +129,9 @@ def test_launch_gcp_vertex(
             },
         },
     }
-    environment = MagicMock()
+    environment = MagicMock(spec=GcpEnvironment)
     environment.project = "dummy"
-    environment.location = "dummy"
+    environment.region = "dummy"
     mocker.patch(
         "wandb.sdk.launch.loader.environment_from_config", return_value=environment
     )
@@ -174,9 +175,9 @@ def test_launch_gcp_vertex_failed(
             },
         },
     }
-    environment = MagicMock()
+    environment = MagicMock(spec=GcpEnvironment)
     environment.project = "dummy"
-    environment.location = "dummy"
+    environment.region = "dummy"
     mocker.patch(
         "wandb.sdk.launch.loader.environment_from_config", return_value=environment
     )
@@ -201,9 +202,9 @@ def test_vertex_options(test_settings, mocker, monkeypatch, mocked_fetchable_git
         "project": "test",
         "resource_args": {"vertex": {}},
     }
-    environment = MagicMock()
+    environment = MagicMock(spec=GcpEnvironment)
     environment.project = "dummy"
-    environment.location = "dummy"
+    environment.region = "dummy"
     mocker.patch(
         "wandb.sdk.launch.loader.environment_from_config", return_value=environment
     )
@@ -249,10 +250,12 @@ def test_vertex_supplied_docker_image(
             },
         },
     }
-    environment = MagicMock()
+    environment = MagicMock(spec=GcpEnvironment)
     environment.project = "dummy"
-    environment.location = "test"
-    mocker.patch("wandb.sdk.launch.loader.environment_from_config", environment)
+    environment.region = "dummy"
+    mocker.patch(
+        "wandb.sdk.launch.loader.environment_from_config", lambda *args: environment
+    )
     run = launch.run(**kwargs)
     assert run.id == job_dict["name"]
     assert run.name == job_dict["display_name"]
