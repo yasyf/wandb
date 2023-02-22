@@ -69,7 +69,7 @@ def resolve_agent_config(
         if launch_config.get("project") is not None:
             user_set_project = True
         resolved_config.update(launch_config.items())
-    else:
+    elif config is not None:
         raise LaunchError(f"Could not find config file: {config_path}")
     if os.environ.get("WANDB_PROJECT") is not None:
         resolved_config.update({"project": os.environ.get("WANDB_PROJECT")})
@@ -179,11 +179,7 @@ def _run(
     runner_config: Dict[str, Any] = {}
     runner_config[PROJECT_SYNCHRONOUS] = synchronous
 
-    if repository:  # override existing registry with CLI arg
-        config = launch_config or {}
-        registry = config.get("registry", {})
-        registry["url"] = repository
-        launch_config["registry"] = registry
+    config = launch_config or {}
 
     build_config, registry_config = construct_builder_args(config)
 

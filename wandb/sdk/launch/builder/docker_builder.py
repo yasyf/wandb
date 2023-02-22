@@ -6,9 +6,6 @@ from typing import Any, Dict
 import wandb
 import wandb.docker as docker
 from wandb.errors import DockerError, LaunchError
-from wandb.sdk.launch.builder.abstract import AbstractBuilder
-from wandb.sdk.launch.environment.abstract import AbstractEnvironment
-from wandb.sdk.launch.registry.abstract import AbstractRegistry
 
 from .._project_spec import (
     EntryPoint,
@@ -16,7 +13,11 @@ from .._project_spec import (
     create_metadata_file,
     get_entry_point_command,
 )
+from ..environment.abstract import AbstractEnvironment
+from ..registry.abstract import AbstractRegistry
+from ..registry.local_registry import LocalRegistry
 from ..utils import LOG_PREFIX, sanitize_wandb_api_key
+from .abstract import AbstractBuilder
 from .build import (
     _create_docker_build_ctx,
     generate_dockerfile,
@@ -92,11 +93,11 @@ class DockerBuilder(AbstractBuilder):
 
     def login(self):
         """Login to the registry."""
-        if not self.registry:
+        if isinstance(self.registry, LocalRegistry):
             _logger.info(f"{LOG_PREFIX} No registry configured, skipping login.")
-            return
-        username, password = self.registry.get_username_password()
-        docker.login(username, password, self.registry.uri)
+        else:
+            username, password = self.registry.get_username_password()
+            docker.login(username, password, self.registry.uri)
 
     def build_image(
         self,

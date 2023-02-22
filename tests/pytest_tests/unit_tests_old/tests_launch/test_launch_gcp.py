@@ -132,7 +132,7 @@ def test_launch_gcp_vertex(
     environment.project = "dummy"
     environment.location = "dummy"
     mocker.patch(
-        "wandb.sdk.launch.agent.util.environment_from_config", return_value=environment
+        "wandb.sdk.launch.loader.environment_from_config", return_value=environment
     )
     run = launch.run(**kwargs)
     assert run.id == job_dict["name"]
@@ -178,7 +178,7 @@ def test_launch_gcp_vertex_failed(
     environment.project = "dummy"
     environment.location = "dummy"
     mocker.patch(
-        "wandb.sdk.launch.agent.util.environment_from_config", return_value=environment
+        "wandb.sdk.launch.loader.environment_from_config", return_value=environment
     )
     run = launch.run(**kwargs)
     assert run.id == job_dict["name"]
@@ -205,7 +205,7 @@ def test_vertex_options(test_settings, mocker, monkeypatch, mocked_fetchable_git
     environment.project = "dummy"
     environment.location = "dummy"
     mocker.patch(
-        "wandb.sdk.launch.agent.util.environment_from_config", return_value=environment
+        "wandb.sdk.launch.loader.environment_from_config", return_value=environment
     )
     try:
         launch.run(**kwargs)
@@ -252,7 +252,7 @@ def test_vertex_supplied_docker_image(
     environment = MagicMock()
     environment.project = "dummy"
     environment.location = "test"
-    mocker.patch("wandb.sdk.launch.agent.util.environment_from_config", environment)
+    mocker.patch("wandb.sdk.launch.loader.environment_from_config", environment)
     run = launch.run(**kwargs)
     assert run.id == job_dict["name"]
     assert run.name == job_dict["display_name"]

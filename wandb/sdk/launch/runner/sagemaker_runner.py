@@ -88,7 +88,7 @@ class SagemakerRunner(AbstractRunner):
     def run(
         self,
         launch_project: LaunchProject,
-        builder: AbstractBuilder,
+        builder: Optional[AbstractBuilder],
     ) -> Optional[AbstractRun]:
         """Run a project on AWS Sagemaker.
 
@@ -154,6 +154,7 @@ class SagemakerRunner(AbstractRunner):
             image = launch_project.docker_image
         else:
             assert entry_point is not None
+            assert builder is not None
             # build our own image
             image = builder.build_image(
                 launch_project,
