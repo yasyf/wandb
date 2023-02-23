@@ -3,7 +3,6 @@
 import logging
 import os
 import re
-import traceback
 
 from wandb.errors import LaunchError
 from wandb.util import get_module

@@ -243,13 +243,13 @@ class LaunchAgent:
         _logger.info("Fetching resource...")
         resource = launch_spec.get("resource") or "local-container"
 
-        env_config = self.default_config.get("environment", {})
+        env_config = self.default_config.get("environment")
         environment = environment_from_config(env_config)
 
-        registry_config = self.default_config.get("registry", {})
+        registry_config = self.default_config.get("registry")
         registry = registry_from_config(registry_config, environment)
 
-        builder_config = self.default_config.get("builder", {})
+        builder_config = self.default_config.get("builder")
         builder = builder_from_config(builder_config, environment, registry)
 
         backend_config: Dict[str, Any] = {

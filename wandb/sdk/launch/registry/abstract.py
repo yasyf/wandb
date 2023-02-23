@@ -2,6 +2,8 @@
 from abc import ABC, abstractmethod
 from typing import Tuple
 
+from ..environment.abstract import AbstractEnvironment
+
 
 class AbstractRegistry(ABC):
     """Abstract base class for registries."""
@@ -20,5 +22,13 @@ class AbstractRegistry(ABC):
 
     @abstractmethod
     def get_username_password(self) -> Tuple[str, str]:
-        """Get the username and password for the registry."""
+        """Get the username and password of the given repository."""
+        raise NotImplementedError
+
+    @classmethod
+    @abstractmethod
+    def from_config(
+        cls, config: dict, environment: "AbstractEnvironment", verify: bool = True
+    ) -> "AbstractRegistry":
+        """Create a registry from a config."""
         raise NotImplementedError
